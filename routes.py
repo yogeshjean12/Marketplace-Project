@@ -1,6 +1,6 @@
 from app import *
 from models import *
-from method import *
+from methods import *
 
 
 
@@ -15,15 +15,17 @@ def login():
         if user.is_username_valid():
             if user.is_password_valid():
                 flash('Logged in')
-                return redirect(url_for('home_page', user_id=user.get_user_id()[0], username=user_name))
+                return redirect(url_for('home_page', user_id=user.get_user_id(), username=user_name))
             else:
-                flash('Invalid username or password')
-                return redirect(url_for('login'))
+                return 'Invalid username or password'
+                #flash('Invalid username or password')
+                #return redirect(url_for('login'))
         else:
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
+            return 'Invalid username or password'
+            #flash('Invalid username or password')
+            #return redirect(url_for('login'))
 
-    return render_template('login.html')
+    #return render_template('login.html')
 
 @app.route('/<username>/user_id-<user_id>/home-page', methods=['GET'])
 def home_page(username, user_id):
@@ -32,3 +34,5 @@ def home_page(username, user_id):
         categories = get_all_categories()
         result = [dict(row) for row in categories]
         return jsonify(result)
+
+    #return render_template('home_page.html', categories=categories)
