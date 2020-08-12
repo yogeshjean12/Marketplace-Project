@@ -1,69 +1,85 @@
+from sqlalchemy.orm import relationship
 from app import db
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+
+base = declarative_base()
 
 
-class User:
+class User(base):
     __tablename__ = 'users'
+
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String(20), nullable=False)
     password = Column(String(60), nullable=False)
+    items = relationship('Cart', backref='User')
 
     def __init__(self, user_name, password):
-        self.user_name = user_name
-        self.password = password
+        self._user_name = user_name
+        self._password = password
 
     def is_username_valid(self):
-        user_name = db.execute('select user_name '
-                               'from online_shopping.users '
-                               'where user_name = \'{}\' '.format(self.user_name))
+        _user_name = db.execute('select user_name '
+                               'from users '
+                               'where user_name = \'{}\' '.format(self._user_name))
 
-        if user_name.fetchone() is None:
+        if _user_name.fetchone() is None:
             return False
         else:
             return True
 
     def is_password_valid(self):
-        user_password = db.execute('select * '
-                                   'from online_shopping.users '
-                                   'where password =  \'{}\''.format(self.password))
+        _user_password = db.execute('select * '
+                                   'from users '
+                                   'where password =  \'{}\''.format(self._password))
 
-        if user_password.fetchone() is None:
+        if _user_password.fetchone() is None:
             return False
         else:
             return True
 
-    def get_user_id(self):
-        user_id = db.execute('select user_id '
-                             'from online_shopping.users '
-                             'where user_name = \'{}\''.format(self.user_name))
-        return user_id.fetchone()
 
-
-class Category:
+class Category(base):
     __tablename__ = 'categories'
-    category_id = Column(Integer, primary_key=True, autoincrement=True)
-    category_name = Column(String(20), nullable=False)
-    category_description = Column(String(100), nullable=True)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(20), nullable=False)
+    items = relationship('Product', backref='Category')
 
 
-class Seller:
+class Seller(base):
     __tablename__ = 'sellers'
-    seller_id = Column(Integer, primary_key=True, autoincrement=True)
-    seller_name = Column(String(20), nullable=False)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(20), nullable=False)
+    items = relationship('Product', backref='Seller')
+
+    def get_seller_name(self):
+        seller_name = db.execute('select name from sellers where id = \'{}\''.format(self.id))
+        return seller_name
 
 
-class Product:
+class Product(base):
     __tablename__ = 'products'
-    product_id = Column(Integer, primary_key=True, autoincrement=True)
-    product_name = Column(String(20), nullable=False)
-    category_id = Column(Integer, foreign_key=True)
-    seller_id = Column(Integer, foreign_key=True)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(20), nullable=False)
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    seller_id = Column(Integer, ForeignKey('sellers.id'))
     product_quantity = Column(Integer, nullable=False)
+    items = relationship('CartProduct', backref='Product')
 
 
-
-class Cart:
+class Cart(base):
     __tablename__ = 'carts'
-    user_id = Column(Integer, nullable=False, foreign_key=True)
-    product_id = Column(Integer, nullable=False, foreign_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'))
+    items = relationship('CartProduct', backref='Cart')
+
+
+class CartProduct(base):
+    __tablename__ = 'cart_products'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cart_id = Column(Integer, ForeignKey('carts.id'))
+    product_id = Column(Integer, ForeignKey('products.id'))
     quantity = Column(Integer, nullable=False)

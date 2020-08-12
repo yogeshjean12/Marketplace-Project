@@ -8,31 +8,36 @@ from methods import *
 def login():
 
     if request.method == 'POST':
-        user_name = request.form['username']
-        password = request.form['psw']
+        user_name = request.form['user_name']
+        password = request.form['password']
         user = User(user_name, password)
 
         if user.is_username_valid():
             if user.is_password_valid():
-                flash('Logged in')
-                return redirect(url_for('home_page', user_id=user.get_user_id(), username=user_name))
+                return 'Login successful'
             else:
                 return 'Invalid username or password'
-                #flash('Invalid username or password')
-                #return redirect(url_for('login'))
         else:
             return 'Invalid username or password'
-            #flash('Invalid username or password')
-            #return redirect(url_for('login'))
 
-    #return render_template('login.html')
 
-@app.route('/<username>/user_id-<user_id>/home-page', methods=['GET'])
-def home_page(username, user_id):
+@app.route('/categories', methods=['GET'])
+def home_page():
 
-    if request.method == 'GET':
-        categories = get_all_categories()
-        result = [dict(row) for row in categories]
-        return jsonify(result)
+    categories = get_all_categories()
+    return jsonify(categories)
 
-    #return render_template('home_page.html', categories=categories)
+
+@app.route('/categories/<category_id>/products', methods=['GET'])
+def category_page(category_id):
+
+    products = get_all_products(category_id)
+    return jsonify(products)
+
+
+@app.route('/cart/user/<user_id>/', methods=['GET'])
+def view_cart(user_id):
+
+    result = get_cart_products(user_id)
+    return jsonify(result)
+
