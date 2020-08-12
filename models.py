@@ -1,4 +1,5 @@
 from sqlalchemy.orm import relationship
+
 from app import db
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,7 +13,6 @@ class User(base):
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String(20), nullable=False)
     password = Column(String(60), nullable=False)
-    items = relationship('Cart', backref='User')
 
     def __init__(self, user_name, password):
         self._user_name = user_name
@@ -44,7 +44,6 @@ class Category(base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(20), nullable=False)
-    items = relationship('Product', backref='Category')
 
 
 class Seller(base):
@@ -52,7 +51,6 @@ class Seller(base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(20), nullable=False)
-    items = relationship('Product', backref='Seller')
 
     def get_seller_name(self):
         seller_name = db.execute('select name from sellers where id = \'{}\''.format(self.id))
@@ -67,14 +65,12 @@ class Product(base):
     category_id = Column(Integer, ForeignKey('categories.id'))
     seller_id = Column(Integer, ForeignKey('sellers.id'))
     product_quantity = Column(Integer, nullable=False)
-    items = relationship('CartProduct', backref='Product')
 
 
 class Cart(base):
     __tablename__ = 'carts'
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
-    items = relationship('CartProduct', backref='Cart')
 
 
 class CartProduct(base):
