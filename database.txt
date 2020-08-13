@@ -12,8 +12,9 @@ create table products(
 		id serial primary key,
 		name text not null,
 		price integer not null,
-		seller_id integer not null,
-		category_id integer not null);
+		quantity integer not null,
+		seller_id integer not null foreign key,
+		category_id integer not null foreign key);
 
 
 create table sellers(
@@ -22,12 +23,12 @@ create table sellers(
 
 
 create table carts(
-		id integer unique not null
-		user_id integer unique not null);
+		id serial not null primary key
+		user_id integer unique not null foreign key);
 
 
 create table cart_products(
-		id integer  primary key,
-		cart_id integer not null,
-		product_id integer not null,
+		id serial primary key,
+		cart_id integer not null foreign key,
+		product_id integer not null foreign key,
 		quantity integer);
