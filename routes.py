@@ -1,6 +1,5 @@
 from app import *
 from models import *
-from methods import *
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -13,6 +12,8 @@ def login():
 
         if user.is_username_valid():
             if user.is_password_valid():
+                session['login_status'] = True
+                session['user_id'] = user.get_user_id()
                 return 'Login successful'
             else:
                 return 'Invalid username or password'
@@ -34,32 +35,44 @@ def display_products(category_id):
 
 @app.route('/cart/<user_id>', methods=['GET'])
 def view_cart(user_id):
-    result = get_cart_products(user_id)
+    cart_id = Cart(user_id).get_cart_id()
+    result = get_cart_products(cart_id)
     return jsonify(result)
 
 
-@app.route('/cart/<user_id>/delete_product', methods=['DELETE'])
+@app.route('/cart/<user_id>', methods=['DELETE'])
 def delete_product_from_cart(user_id):
     product_id = request.form['product_id']
-    remove_product_from_cart(user_id, product_id)
+    cart_id = Cart(user_id).get_cart_id()
+    CartProduct(cart_id, product_id).remove_product_from_cart()
     return 'Product deleted from cart successfully'
 
 
-@app.route('/cart/<user_id>/add_product', methods=['POST'])
+@app.route('/cart/<user_id>', methods=['POST'])
 def add_to_cart(user_id):
     product_id = request.form['product_id']
-    add_product_to_cart(user_id, product_id)
+    cart_id = Cart(user_id).get_cart_id()
+    CartProduct(cart_id, product_id).add_product_to_cart()
     return 'Product added to cart successfully'
 
 
-@app.route('/cart/<user_id>/update_quantity', methods=['PUT'])
+@app.route('/cart/<user_id>', methods=['PUT'])
 def update_quantity(user_id):
-
     product_id = request.form['product_id']
     quantity = request.form['quantity']
-    if quantity_check(quantity, product_id, user_id) == True:
-        update_product_quantity_in_cart(user_id, quantity, product_id)
+    cart_id = Cart(user_id).get_cart_id()
+    if Product(product_id).quantity_check(quantity) == True:
+        CartProduct(cart_id, product_id).update_product_quantity_in_cart(quantity)
         return 'Product quantity in cart get updated'
     else:
         return 'Out of stock'
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('login_status', None)
+    return 'Logged out'
+
+
 
