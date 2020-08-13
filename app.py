@@ -1,20 +1,17 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from sqlalchemy import create_engine
+
 
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'YOUR-SECRET'
-def connect_db():
-    DATABASE_URL = "postgres+psycopg2://postgres:yogesh5201@localhost/postgres"
-    return create_engine(DATABASE_URL)
+app.config['SECRET_KEY'] = 'NOTHING-SECRET'
 
-
-db = connect_db()
+db = create_engine("postgres+psycopg2://postgres:yogesh5201@localhost/project")
 
 
 from routes import *
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=
