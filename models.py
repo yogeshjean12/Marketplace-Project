@@ -2,7 +2,6 @@ from app import *
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 
-
 Base = declarative_base()
 
 
@@ -16,16 +15,17 @@ class User(Base):
     def __init__(self, user_name, password):
         self._user_name = user_name
         self._password = password
-        self._user = db_session.query(User).filter_by(user_name=self._user_name).first()
 
     def is_valid(self):
-        if self._user.user_name == self._user_name and self._user.password == self._password:
+        _user = db_session.query(User).filter_by(user_name=self._user_name).first()
+        if _user.user_name == self._user_name and _user.password == self._password:
             return True
         else:
             return False
 
     def get_user_id(self):
-        return self._user.user_id
+        _user = db_session.query(User).filter_by(user_name=self._user_name).first()
+        return _user.user_id
 
 
 class Category(Base):
@@ -36,15 +36,16 @@ class Category(Base):
 
     def __init__(self, category_id):
         self._category_id = category_id
-        self._category = db_session.query(Category).filter_by(id=self._category_id).first()
 
     def get_category_name(self):
-        return self._category.name
+        _category = db_session.query(Category).filter_by(id=self._category_id).first()
+        return _category.name
 
     def get_category_details(self):
+        _category = db_session.query(Category).filter_by(id=self._category_id).first()
         category_dict = {}
-        category_dict['category_id'] = self._category.id
-        category_dict['category_name'] = self._category.name
+        category_dict['category_id'] = _category.id
+        category_dict['category_name'] = _category.name
         return category_dict
 
 
@@ -56,10 +57,10 @@ class Seller(Base):
 
     def __init__(self, seller_id):
         self._seller_id = seller_id
-        self._seller = db_session.query(Seller).filter_by(id=self._seller_id).first()
 
     def get_seller_name(self):
-        return self._seller.name
+        _seller = db_session.query(Seller).filter_by(id=self._seller_id).first()
+        return _seller.name
 
 
 class Product(Base):
@@ -74,20 +75,21 @@ class Product(Base):
 
     def __init__(self, product_id):
         self._product_id = product_id
-        self._product = db_session.query(Product).filter_by(id=self._product_id).first()
 
     def get_product_details(self):
+        _product = db_session.query(Product).filter_by(id=self._product_id).first()
         product_dict = {}
-        product_dict['product_id'] = self._product.id
-        product_dict['product_name'] = self._product.name
-        product_dict['price'] = self._product.price
-        product_dict['category_name'] = Category(self._product.category_id).get_category_name()
-        product_dict['seller_name'] = Seller(self._product.seller_id).get_seller_name()
-        product_dict['quantity'] = self._product.quantity
+        product_dict['product_id'] = _product.id
+        product_dict['product_name'] = _product.name
+        product_dict['price'] = _product.price
+        product_dict['category_name'] = Category(_product.category_id).get_category_name()
+        product_dict['seller_name'] = Seller(_product.seller_id).get_seller_name()
+        product_dict['quantity'] = _product.quantity
         return product_dict
 
     def quantity_check(self, quantity):
-        if self._product.quantity >= (int(quantity)):
+        _product = db_session.query(Product).filter_by(id=self._product_id).first()
+        if _product.quantity >= (int(quantity)):
             return True
         else:
             return False
@@ -100,10 +102,10 @@ class Cart(Base):
 
     def __init__(self, _user_id):
         self._user_id = _user_id
-        self._cart = db_session.query(Cart).filter_by(user_id=self._user_id).first()
 
     def get_cart_id(self):
-        return self._cart.id
+        _cart = db_session.query(Cart).filter_by(user_id=self._user_id).first()
+        return _cart.id
 
 
 class CartProduct(Base):
@@ -116,7 +118,6 @@ class CartProduct(Base):
     def __init__(self, cart_id, product_id):
         self._cart_id = cart_id
         self._product_id = product_id
-        self._cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id, product_id=self._product_id).first()
 
     def add_product_to_cart(self):
         db.execute('insert into cart_products '
@@ -129,18 +130,24 @@ class CartProduct(Base):
         return new_id
 
     def remove_product_from_cart(self):
-        db_session.delete(self._cart_product)
+        _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
+                                                                product_id=self._product_id).first()
+        db_session.delete(_cart_product)
         db_session.commit()
         return True
 
     def update_product_quantity_in_cart(self, quantity):
-        self._cart_product.product_quantity = quantity
-        db_session.add(self._cart_product)
+        _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
+                                                                product_id=self._product_id).first()
+        _cart_product.product_quantity = quantity
+        db_session.add(_cart_product)
         db_session.commit()
         return True
 
     def get_cart_product_quantity(self):
-        return self._cart_product.product_quantity
+        _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
+                                                                product_id=self._product_id).first()
+        return _cart_product.product_quantity
 
 
 def get_all_categories():
@@ -173,6 +180,4 @@ def get_cart_product_details(product_id, cart_id):
         product_details = Product(row.id).get_product_details()
         product_details['quantity'] = CartProduct(cart_id, row.id).get_cart_product_quantity()
     return product_details
-
-
 

@@ -11,6 +11,7 @@ def login():
         user = User(user_name, password)
         if user.is_valid() == True:
             session['user_id'] = user.get_user_id()
+            session['login status'] = True
             return 'Login'
         else:
             return 'Invalid username or password'
