@@ -6,6 +6,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
+    image = Column(String)
 
     def __init__(self, category_id):
         self._category_id = category_id
@@ -19,5 +20,6 @@ class Category(Base):
         category_dict = {}
         category_dict['category_id'] = _category.id
         category_dict['category_name'] = _category.name
+        category_dict['category_image'] = _category.image
         return category_dict
 

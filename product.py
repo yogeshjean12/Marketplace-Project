@@ -12,6 +12,7 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey('categories.id'))
     seller_id = Column(Integer, ForeignKey('sellers.id'))
     quantity = Column(Integer, nullable=False)
+    image = Column(String)
 
     def __init__(self, product_id):
         self._product_id = product_id
@@ -25,10 +26,12 @@ class Product(Base):
         product_dict['category_name'] = Category(_product.category_id).get_category_name()
         product_dict['seller_name'] = Seller(_product.seller_id).get_seller_name()
         product_dict['quantity'] = _product.quantity
+        product_dict['product_image'] = _product.image
         return product_dict
 
     def quantity_check(self, quantity):
         _product = db_session.query(Product).filter_by(id=self._product_id).first()
+
         if _product.quantity >= (int(quantity)):
             return True
         else:
