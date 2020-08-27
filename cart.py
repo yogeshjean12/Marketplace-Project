@@ -26,9 +26,17 @@ class CartProduct(Base):
         self._product_id = product_id
 
     def add_product_to_cart(self):
-        db.execute('insert into cart_products '
-                   'values(\'{}\',\'{}\',\'{}\',\'1\')'.format(self.__get_new_id(), self._cart_id, self._product_id))
-        return True
+        _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
+                                                                product_id=self._product_id).first()
+        if _cart_product is None:
+            db.execute('insert into cart_products '
+                       'values(\'{}\',\'{}\',\'{}\',\'1\')'.format(self.__get_new_id(), self._cart_id, self._product_id))
+            return True
+        else:
+            _cart_product.product_quantity += 1
+            db_session.add(_cart_product)
+            db_session.commit()
+
 
     def __get_new_id(self):
         id = db.execute('select max(id) from cart_products')

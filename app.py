@@ -3,12 +3,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session,sessionmaker
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-
+from flask_cors import CORS
 
 Base = declarative_base()
 
 
 app = Flask(__name__)
+
+CORS(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['SECRET_KEY'] = 'YOUR-SECRET'
 
