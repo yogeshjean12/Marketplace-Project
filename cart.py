@@ -51,12 +51,15 @@ class CartProduct(Base):
         return True
 
     def update_product_quantity_in_cart(self, quantity):
-        _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
-                                                                product_id=self._product_id).first()
-        _cart_product.product_quantity = quantity
-        db_session.add(_cart_product)
-        db_session.commit()
-        return True
+        if int(quantity) >= 1:
+            _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
+                                                                    product_id=self._product_id).first()
+            _cart_product.product_quantity = quantity
+            db_session.add(_cart_product)
+            db_session.commit()
+            return True
+        else:
+            return False
 
     def get_cart_product_quantity(self):
         _cart_product = db_session.query(CartProduct).filter_by(cart_id=self._cart_id,
