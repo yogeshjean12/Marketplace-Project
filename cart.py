@@ -1,4 +1,5 @@
 from app import *
+from product import *
 
 
 class Cart(Base):
@@ -34,9 +35,14 @@ class CartProduct(Base):
             return True
         else:
             _cart_product.product_quantity += 1
-            db_session.add(_cart_product)
-            db_session.commit()
-
+            print(_cart_product.product_quantity)
+            if Product(self._product_id).quantity_check(_cart_product.product_quantity):
+                print(_cart_product.product_quantity)
+                db_session.add(_cart_product)
+                db_session.commit()
+                return True
+            else:
+                return False
 
     def __get_new_id(self):
         id = db.execute('select max(id) from cart_products')
