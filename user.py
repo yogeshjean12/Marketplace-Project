@@ -27,9 +27,12 @@ class User(Base):
         return _user.user_id
 
     def register_user(self, confirm_password):
+
         if self.__is_username_exist() == False and self.__is_password_valid(confirm_password) == True:
+            _id = self.__get_new_id()
             db.execute('insert into users '
-                    'values(\'{}\',\'{}\',\'{}\')'.format(self.__get_new_id(), self._user_name, self._password))
+                    'values(\'{}\',\'{}\',\'{}\')'.format(_id, self._user_name, self._password))
+            db.execute('insert into carts values (\'{}\',\'{}\')'.format(_id, _id))
             return True
         else:
             return False
@@ -41,7 +44,6 @@ class User(Base):
         else:
             return True
 
-
     def __is_password_valid(self, confirm_password):
         if self._password == confirm_password:
             if self._password != '' and confirm_password != '':
@@ -50,8 +52,6 @@ class User(Base):
                 return False
         else:
             return False
-
-
 
     def __get_new_id(self):
         id = db.execute('select max(user_id) from users')
